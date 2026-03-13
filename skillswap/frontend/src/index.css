@@ -1,5 +1,0 @@
-* { box-sizing: border-box; }
-body { margin: 0; font-family: Arial, sans-serif; background: #f7f8fc; color: #222; }
-input, button { font-size: 1rem; padding: 0.5rem; border: 1px solid #ccc; border-radius: 0.35rem; }
-button { cursor: pointer; background: #334155; color: white; border: none; }
-button:hover { background: #1f2937; }
