@@ -2,11 +2,45 @@ import { supabase } from '../lib/supabaseClient';
 
 export const db = {
   async getProfile(userId) {
-    const { data, error } = await supabase
+    let { data, error } = await supabase
       .from('profiles')
       .select('*')
       .eq('id', userId)
       .single();
+    
+    if (error && error.code === 'PGRST116') {
+      const { data: newProfile, error: createError } = await supabase
+        .from('profiles')
+        .insert({ id: userId, credits: 10 })
+        .select()
+        .single();
+      
+      if (createError) throw createError;
+      return newProfile;
+    }
+    
+    if (error) throw error;
+    return data;
+  },
+
+  async ensureProfile(userId, email) {
+    let { data, error } = await supabase
+      .from('profiles')
+      .select('*')
+      .eq('id', userId)
+      .single();
+    
+    if (error && error.code === 'PGRST116') {
+      const { data: newProfile, error: createError } = await supabase
+        .from('profiles')
+        .insert({ id: userId, email, credits: 10 })
+        .select()
+        .single();
+      
+      if (createError) throw createError;
+      return newProfile;
+    }
+    
     if (error) throw error;
     return data;
   },

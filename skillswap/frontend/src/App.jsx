@@ -33,7 +33,7 @@ function App() {
       
       if (data.session?.user) {
         try {
-          const userProfile = await db.getProfile(data.session.user.id);
+          const userProfile = await db.ensureProfile(data.session.user.id, data.session.user.email);
           setProfile(userProfile);
         } catch (err) {
           console.error('Error fetching profile:', err);
@@ -49,7 +49,7 @@ function App() {
       
       if (session?.user) {
         try {
-          const userProfile = await db.getProfile(session.user.id);
+          const userProfile = await db.ensureProfile(session.user.id, session.user.email);
           setProfile(userProfile);
         } catch (err) {
           console.error('Error fetching profile:', err);
