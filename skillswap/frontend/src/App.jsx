@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react';
-import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
+import { BrowserRouter as Router, Routes, Route, Navigate, useNavigate } from 'react-router-dom';
 import { supabase } from './lib/supabaseClient';
 import { getSession, signOut } from './services/authService';
 import { db } from './services/db';
@@ -75,6 +75,7 @@ function App() {
   const handleSignOut = async () => {
     await signOut();
     setProfile(null);
+    window.location.href = '/';
   };
 
   const refreshProfile = async () => {
