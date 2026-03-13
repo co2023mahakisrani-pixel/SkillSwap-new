@@ -1,8 +1,9 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Navigate } from 'react-router-dom';
 import { Briefcase, Clock, Upload, CheckCircle, AlertCircle, Loader2 } from 'lucide-react';
+import { db } from '../services/db';
 
-const TeachSkill = ({ user }) => {
+const TeachSkill = ({ user, profile }) => {
     const [formData, setFormData] = useState({
         skillName: '',
         category: '',
@@ -31,9 +32,15 @@ const TeachSkill = ({ user }) => {
         setLoading(true);
         setError('');
         try {
-            await new Promise(resolve => setTimeout(resolve, 1500));
+            await db.addTeacherSkill(
+                user.id,
+                formData.skillName,
+                formData.description,
+                parseInt(formData.experienceLevel) || 1
+            );
             setSuccess(true);
         } catch (err) {
+            console.error('Error submitting skill:', err);
             setError('Failed to submit skill. Please try again.');
         } finally {
             setLoading(false);

@@ -2,10 +2,10 @@ import React from 'react';
 import { Link } from 'react-router-dom';
 import Navbar from './Navbar';
 
-const Layout = ({ children, user, onSignOut, darkMode, toggleDarkMode }) => {
+const Layout = ({ children, user, profile, onSignOut, darkMode, toggleDarkMode }) => {
     return (
         <div className={`min-h-screen transition-colors duration-300 ${darkMode ? 'dark bg-slate-950 text-slate-50' : 'bg-slate-50 text-slate-900'}`}>
-            <Navbar user={user} onSignOut={onSignOut} darkMode={darkMode} toggleDarkMode={toggleDarkMode} />
+            <Navbar user={user} profile={profile} onSignOut={onSignOut} darkMode={darkMode} toggleDarkMode={toggleDarkMode} />
             <main className="max-w-7xl mx-auto px-4 py-8">
                 {children}
             </main>

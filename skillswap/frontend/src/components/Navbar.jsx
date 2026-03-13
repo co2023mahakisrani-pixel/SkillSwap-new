@@ -2,7 +2,7 @@ import React, { useState } from 'react';
 import { Link, useLocation } from 'react-router-dom';
 import { Home, BookOpen, User, LogOut, Sun, Moon, Cpu, ChevronDown, GraduationCap, Briefcase, Bell, Settings, LogOut as LogOutIcon } from 'lucide-react';
 
-const Navbar = ({ user, onSignOut, darkMode, toggleDarkMode }) => {
+const Navbar = ({ user, profile, onSignOut, darkMode, toggleDarkMode }) => {
     const location = useLocation();
     const [dropdownOpen, setDropdownOpen] = useState(false);
 
@@ -65,7 +65,7 @@ const Navbar = ({ user, onSignOut, darkMode, toggleDarkMode }) => {
                         >
                             <div className="hidden sm:block text-right">
                                 <p className="text-sm font-semibold truncate max-w-[150px]">{user.email}</p>
-                                <p className="text-xs text-primary-600 font-bold">10 Credits</p>
+                                <p className="text-xs text-primary-600 font-bold">{profile?.credits || 0} Credits</p>
                             </div>
                             <ChevronDown className={`w-4 h-4 text-slate-500 transition-transform ${dropdownOpen ? 'rotate-180' : ''}`} />
                         </button>

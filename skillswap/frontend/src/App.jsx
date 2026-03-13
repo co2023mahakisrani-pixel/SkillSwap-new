@@ -2,6 +2,7 @@ import { useEffect, useState } from 'react';
 import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
 import { supabase } from './lib/supabaseClient';
 import { getSession, signOut } from './services/authService';
+import { db } from './services/db';
 
 import Layout from './components/Layout';
 
@@ -13,11 +14,12 @@ import TeachSkill from './pages/TeachSkill';
 import CourseDetail from './pages/CourseDetail';
 import Notifications from './pages/Notifications';
 import Profile from './pages/Profile';
-import LiveClass from './pages/LiveClass';
+import LectureView from './pages/LectureView';
 import About from './pages/About';
 
 function App() {
   const [user, setUser] = useState(null);
+  const [profile, setProfile] = useState(null);
   const [loading, setLoading] = useState(true);
   const [darkMode, setDarkMode] = useState(() => {
     const saved = localStorage.getItem('skillswap-theme');
@@ -28,13 +30,33 @@ function App() {
     const checkSession = async () => {
       const { data } = await getSession();
       setUser(data.session?.user ?? null);
+      
+      if (data.session?.user) {
+        try {
+          const userProfile = await db.getProfile(data.session.user.id);
+          setProfile(userProfile);
+        } catch (err) {
+          console.error('Error fetching profile:', err);
+        }
+      }
       setLoading(false);
     };
 
     checkSession();
 
-    const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, session) => {
+    const { data: { subscription } } = supabase.auth.onAuthStateChange(async (_event, session) => {
       setUser(session?.user ?? null);
+      
+      if (session?.user) {
+        try {
+          const userProfile = await db.getProfile(session.user.id);
+          setProfile(userProfile);
+        } catch (err) {
+          console.error('Error fetching profile:', err);
+        }
+      } else {
+        setProfile(null);
+      }
     });
 
     return () => subscription.unsubscribe();
@@ -52,15 +74,19 @@ function App() {
 
   const handleSignOut = async () => {
     await signOut();
+    setProfile(null);
   };
 
-  if (loading) {
-    return (
-      <div className="min-h-screen flex items-center justify-center bg-slate-50 dark:bg-slate-950">
-        <div className="w-12 h-12 border-4 border-primary-600 border-t-transparent rounded-full animate-spin"></div>
-      </div>
-    );
-  }
+  const refreshProfile = async () => {
+    if (user) {
+      try {
+        const userProfile = await db.getProfile(user.id);
+        setProfile(userProfile);
+      } catch (err) {
+        console.error('Error refreshing profile:', err);
+      }
+    }
+  };
 
   const toggleDarkMode = () => setDarkMode(!darkMode);
 
@@ -68,6 +94,7 @@ function App() {
     <Router>
       <Layout
         user={user}
+        profile={profile}
         onSignOut={handleSignOut}
         darkMode={darkMode}
         toggleDarkMode={toggleDarkMode}
@@ -81,7 +108,7 @@ function App() {
           />
           <Route
             path="/dashboard"
-            element={user ? <Dashboard user={user} /> : <Navigate to="/auth" />}
+            element={user ? <Dashboard user={user} profile={profile} refreshProfile={refreshProfile} /> : <Navigate to="/auth" />}
           />
           <Route
             path="/learn"
@@ -89,11 +116,11 @@ function App() {
           />
           <Route
             path="/learn/:id"
-            element={user ? <CourseDetail user={user} /> : <Navigate to="/auth" />}
+            element={user ? <CourseDetail user={user} profile={profile} refreshProfile={refreshProfile} /> : <Navigate to="/auth" />}
           />
           <Route
             path="/teach"
-            element={user ? <TeachSkill user={user} /> : <Navigate to="/auth" />}
+            element={user ? <TeachSkill user={user} profile={profile} /> : <Navigate to="/auth" />}
           />
           <Route
             path="/notifications"
@@ -101,11 +128,11 @@ function App() {
           />
           <Route
             path="/profile"
-            element={user ? <Profile user={user} onSignOut={handleSignOut} /> : <Navigate to="/auth" />}
+            element={user ? <Profile user={user} profile={profile} onSignOut={handleSignOut} refreshProfile={refreshProfile} /> : <Navigate to="/auth" />}
           />
           <Route
             path="/live/:id"
-            element={user ? <LiveClass user={user} /> : <Navigate to="/auth" />}
+            element={user ? <LectureView user={user} profile={profile} /> : <Navigate to="/auth" />}
           />
           <Route path="*" element={<Navigate to="/" />} />
         </Routes>
